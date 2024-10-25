@@ -11,7 +11,7 @@ The solution automatically detects resources that are not compliant with the org
 
 ## Architecture Diagram
 
-[](images/arch-diagram.png)
+![](images/arch-diagram.png)
 
 The solution works as follows:
 1. AWS Config Rule continuously monitors resources for required tags
