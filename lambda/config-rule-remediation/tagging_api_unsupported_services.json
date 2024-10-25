@@ -1,0 +1,3 @@
+{
+    "AWS::Events::Rule": "validate_and_apply_tags_eventbridge"
+}
