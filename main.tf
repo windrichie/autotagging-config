@@ -55,6 +55,11 @@ resource "aws_lambda_function" "config_autotagging_rule_detector" {
   memory_size      = 128
   timeout          = 30
   architectures    = ["arm64"]
+  reserved_concurrent_executions = 10
+  dead_letter_config {
+    target_arn = aws_sqs_queue.remediation_dlq.arn
+  }
+
 }
 
 resource "aws_lambda_permission" "function_config_autotagging_rule_detector" {
@@ -62,6 +67,7 @@ resource "aws_lambda_permission" "function_config_autotagging_rule_detector" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.config_autotagging_rule_detector.arn
   principal     = "config.amazonaws.com"
+  source_arn = aws_config_config_rule.autotagging_required_tags_rule.arn
 }
 
 resource "aws_iam_role" "config_autotagging_rule_detector_role" {
@@ -141,6 +147,7 @@ resource "aws_sqs_queue" "remediation_queue" {
   message_retention_seconds = 1209600  # 14 days
   receive_wait_time_seconds = 20
   visibility_timeout_seconds = 360  # 6 minutes, should be greater than Lambda function timeout
+  kms_master_key_id = "alias/aws/sqs"
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.remediation_dlq.arn
@@ -183,6 +190,7 @@ resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
 
 resource "aws_sqs_queue" "remediation_dlq" {
   name = "config-autotagging-remediation-dlq"
+  kms_master_key_id = "alias/aws/sqs"
 }
 
 data "archive_file" "config_rule_remediation_lambda_zip" {
@@ -200,6 +208,10 @@ resource "aws_lambda_function" "config_autotagging_rule_remediation" {
   memory_size      = 128
   timeout          = 300
   architectures    = ["arm64"]
+  reserved_concurrent_executions = 5
+  dead_letter_config {
+    target_arn = aws_sqs_queue.remediation_dlq.arn
+  }
 }
 
 resource "aws_iam_role" "config_autotagging_rule_remediation_role" {
