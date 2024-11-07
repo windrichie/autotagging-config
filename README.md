@@ -3,7 +3,7 @@
 This repository provides an automated solution to enforce mandatory tags on AWS resources using AWS Config Rules and Lambda functions.
 
 ## Disclaimer
-This project is for demonstration purposes and should be thoroughly reviewed and tested before using in production environments.
+This project is for demonstration purposes and should be thoroughly reviewed and tested before using in production environments. You should work with your organisation’s security team to comply with the standards set if you are to deploy this solution in Production environment.
 
 ## Overview
 
